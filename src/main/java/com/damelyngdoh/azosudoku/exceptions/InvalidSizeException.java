@@ -13,6 +13,10 @@ public class InvalidSizeException extends Exception {
     
     private static final String MESSAGE = "Invalid size %d. Must be a perfect nonet integer.";
 
+    /**
+     * Constructs a new InvalidSizeException.
+     * @param size the invalid size of the grid.
+     */
     public InvalidSizeException(int size) {
         super(String.format(MESSAGE, size));
     }

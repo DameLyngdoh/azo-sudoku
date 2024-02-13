@@ -13,10 +13,10 @@ public class DisallowedValueException extends Exception {
     private static final String MESSAGE = "Value %d, not allowed for cell at (%d,%d)";
 
     /**
-     * 
-     * @param row
-     * @param column
-     * @param value
+     * Constructs a new DisallowedValueException object.
+     * @param row the row of the cell.
+     * @param column the column of the cell.
+     * @param value the disallowed value.
      */
     public DisallowedValueException(int row, int column, int value) {
         super(String.format(MESSAGE, value, row, column));

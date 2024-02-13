@@ -14,4 +14,8 @@ public class InvalidSudokuException extends Exception {
     public InvalidSudokuException() {
         super(MESSAGE);
     }
+
+    public InvalidSudokuException(String msg) {
+        super(msg);
+    }
 }

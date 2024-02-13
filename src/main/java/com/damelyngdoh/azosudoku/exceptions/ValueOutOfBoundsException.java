@@ -16,6 +16,11 @@ public class ValueOutOfBoundsException extends Exception {
     
     private static final String MESSAGE = "Value %d out of bounds. Value must be in the range 1 to %d.";
 
+    /**
+     * Constructs a new ValueOutOfBoundsException object.
+     * @param value the invalid value.
+     * @param gridSize the size of the grid.
+     */
     public ValueOutOfBoundsException(int value, int gridSize) {
         super(String.format(MESSAGE, value, gridSize));
     }

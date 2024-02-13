@@ -11,6 +11,11 @@ public class GridIndexOutOfBoundsException extends RuntimeException {
     
     private static final String MESSAGE = "Invalid index %d. Grid index (row/column) must be in the range 0 to %d";
 
+    /**
+     * Constructs a new GridIndexOutOfBoundsException.
+     * @param index the invalid index.
+     * @param gridSize the size of the grid.
+     */
     public GridIndexOutOfBoundsException(int index, int gridSize) {
         super(String.format(MESSAGE, index, gridSize - 1));
     }

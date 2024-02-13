@@ -24,6 +24,14 @@ Refer to the below articles for general terminilogies and conventions:
 - [sudokudragon.com](https://www.sudokudragon.com/sudoku.htm)
 - [sudokuwiki.org](https://www.sudokuwiki.org/glossary)
 
+### Active Verification
+
+This term (within the domain of this project) indicates if the grid, represented by the [Grid](src/main/java/com/damelyngdoh/azosudoku/Grid.java) class performs a validation before setting the value of a cell. This charateristic can be turned on or off using the setter of the `activeVerification` flag (`setActiveVerification` method). By default this characteristic is turned on. Disabling will improve performance as each action of setting a cell's value will not trigger any check on the related cells in the grid at the cost of possibly setting invalid values to the cells. When the flag is off and the `setActiveVerification` method is invoked to turn on (passing `true` as parameter), the `validateGrid` method will be called to perform a complete grid validation before the flag is set to `true`.
+
+### Invalid Empty Cell
+
+An empty cell where there are no possible or permissible values that can be populated. A valid Sudoku puzzle must not contain any invalid empty cell.
+
 ### Generator
 
 A generator specified by the interface [`com.damelyngdoh.azosudoku.generators.SudokuGenerator`](src/main/java/com/damelyngdoh/azosudoku/generators/SudokuGenerator.java), as the name suggests, generates a Sudoku puzzle. Some implementation(s) are available such as the [`DiagonalFirstSudokuGenerator`](src/main/java/com/damelyngdoh/azosudoku/generators/DiagonalFirstSudokuGenerator.java) or [`SimpleSudokuGenerator`](src/main/java/com/damelyngdoh/azosudoku/generators/SimpleSudokuGenerator.java) classes in the same package. A generator can generate a completely filled puzzle or a partially filled puzzle depending.
