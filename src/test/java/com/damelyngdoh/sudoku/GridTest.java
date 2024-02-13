@@ -29,6 +29,7 @@ import com.damelyngdoh.azosudoku.House;
 import com.damelyngdoh.azosudoku.exceptions.DisallowedValueException;
 import com.damelyngdoh.azosudoku.exceptions.GridIndexOutOfBoundsException;
 import com.damelyngdoh.azosudoku.exceptions.InvalidSizeException;
+import com.damelyngdoh.azosudoku.exceptions.InvalidSudokuException;
 import com.damelyngdoh.azosudoku.exceptions.ValueOutOfBoundsException;
 
 @TestInstance(Lifecycle.PER_METHOD)
@@ -657,6 +658,45 @@ public class GridTest {
             () -> assertEquals(outputWithDefaultEmptyCellNotation, partialEmptyGrid.asString(CELL_DELIMITER, ROW_DELIMITER), "asString with default empty cell notation returned wrong string when valid arguments are passed."),
             () -> assertEquals(outputWithCustomArguments, partialEmptyGrid.asString(CELL_DELIMITER, ROW_DELIMITER, EMPTY_CELL_NOTATION), "asString returned wrong string when valid arguments are passed.")
         );
-        
+    }
+
+    @Test
+    void validateGrid_test() {
+        assertDoesNotThrow(() -> emptyGrid.validateGrid(), "validateGrid threw InvalidSudokuException with valid empty grid.");
+        assertDoesNotThrow(() -> partialEmptyGrid.validateGrid(), "validateGrid threw InvalidSudokuException with valid partially empty grid.");
+        assertDoesNotThrow(() -> completeGrid.validateGrid(), "validateGrid threw InvalidSudokuException with valid complete grid.");
+        assertThrowsExactly(InvalidSudokuException.class, () -> invalidGrid.validateGrid(), "validateGrid did not throw InvalidSudokuException with invalid grid.");
+    }
+
+    @Test
+    void validateGrid_conflicting_values_test() throws InvalidSudokuException, ValueOutOfBoundsException, DisallowedValueException {
+        emptyGrid.setActiveVerification(false);
+        emptyGrid.setValue(0, 0, 1);
+        emptyGrid.setValue(0, 1, 1);
+        assertThrowsExactly(InvalidSudokuException.class, () -> emptyGrid.validateGrid(), "validateGrid did not throw InvalidSudokuException with empty grid that is populated with invalid values.");
+    }
+
+    @Test
+    void setActiveVerification_test() {
+        assertDoesNotThrow(() -> partialEmptyGrid.setActiveVerification(false), "setActiveVerification threw InvalidSudokuException with valid partially empty grid on false parameter.");
+        assertDoesNotThrow(() -> partialEmptyGrid.setActiveVerification(true), "setActiveVerification threw InvalidSudokuException with valid partially empty grid on true parameter.");
+        assertDoesNotThrow(() -> invalidGrid.setActiveVerification(false), "setActiveVerification threw InvalidSudokuException with invalid grid on false parameter.");
+        assertThrowsExactly(InvalidSudokuException.class, () -> invalidGrid.setActiveVerification(true), "setActiveVerification did not throw InvalidSudokuException with invalid grid on true parameter.");
+        assertThrowsExactly(InvalidSudokuException.class, 
+            () -> {
+                emptyGrid.setActiveVerification(false);
+                emptyGrid.setValue(0, 0, 1);
+                emptyGrid.setValue(0, 1, 1);
+                emptyGrid.setActiveVerification(true);
+            }, "setActiveVerification did not throw InvalidSudokuException with grid containing conflicting values in a house on true parameter.");
+    }
+
+    @Test
+    void setValue_post_setActiveVerification_test() {
+        assertDoesNotThrow(() -> {
+            emptyGrid.setActiveVerification(false);
+            emptyGrid.setValue(0, 0, 1);
+            emptyGrid.setValue(0, 1, 1);
+        }, "setValue threw exception with conflicting values when active verificaiton flag is turned off.");
     }
 }

@@ -1,9 +1,12 @@
 package com.damelyngdoh.azosudoku;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Queue;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -11,6 +14,7 @@ import java.util.stream.Stream;
 import com.damelyngdoh.azosudoku.exceptions.DisallowedValueException;
 import com.damelyngdoh.azosudoku.exceptions.GridIndexOutOfBoundsException;
 import com.damelyngdoh.azosudoku.exceptions.InvalidSizeException;
+import com.damelyngdoh.azosudoku.exceptions.InvalidSudokuException;
 import com.damelyngdoh.azosudoku.exceptions.ValueOutOfBoundsException;
 
 /**
@@ -44,9 +48,14 @@ public class Grid {
     private List<House> nonets;
 
     /**
+     * Flag indicating if every value set must be verified actively.
+     */
+    private boolean activeVerification = true;
+
+    /**
      * Initializes the two-dimensional array with the specified size.
      * @param size
-     */
+     */ 
     private void initializeMatrix(int size) {
         for(int row = 0, column = 0; row < size; row++) {
             for(column = 0; column < size; column++) {
@@ -122,6 +131,26 @@ public class Grid {
      */
     public int getSize() {
         return matrix.length;
+    }
+
+    /**
+     * @return the active verfication state of the grid.
+     */
+    public boolean getActiveVerification() {
+        return activeVerification;
+    }
+
+    /**
+     * Sets the active verification flag.
+     * In case if the active verification is set ot true, a grid validation is performed before setting the flag.
+     * @param activeVerification the new state of the active verification flag.
+     * @throws InvalidSudokuException thrown when either an empty invalid cell or conflicting values in a house are found.
+     */
+    public void setActiveVerification(boolean activeVerification) throws InvalidSudokuException {
+        if(activeVerification) {
+            validateGrid();
+        }
+        this.activeVerification = activeVerification;
     }
 
     /**
@@ -334,8 +363,10 @@ public class Grid {
         Validator.validateIndex(this, column, HouseType.COLUMN);
         Validator.validateIndex(this, row, HouseType.ROW);
         Validator.validateValue(this, value);
-        if(!getPermissibleValues(row, column).contains(value))
-            throw new DisallowedValueException(row, column, value);
+        if(activeVerification) {
+            if(!getPermissibleValues(row, column).contains(value))
+                throw new DisallowedValueException(row, column, value);
+        }
         matrix[row][column].setValue(value);
     }
 
@@ -363,6 +394,31 @@ public class Grid {
             throw new NullPointerException(NULL_CELL_ARGUMENT_MSG);
         }
         return removeValue(cell.getRow(), cell.getColumn());
+    }
+
+    /**
+     * Validates the grid by checking that there exists no:
+     * <ul>
+     *  <li>invalid empty cells</li>
+     *  <li>confilcting values in a house</li>
+     * </ul>
+     * @throws InvalidSudokuException thrown when either an empty invalid cell or conflicting values in a house are found.
+     */
+    public void validateGrid() throws InvalidSudokuException {
+        if(hasEmptyAndInvalidCells()) {
+            throw new InvalidSudokuException("Grid contains invalid empty cells.");
+        }
+        Map<Integer,Set<Cell>> valuesMap = getNonEmptyCells().stream().collect(Collectors.groupingBy(Cell::getValue, Collectors.toSet()));
+        for(Map.Entry<Integer,Set<Cell>> entry : valuesMap.entrySet()) {
+            Queue<Cell> queue = new ArrayDeque<>(entry.getValue());
+            for(Cell currentCell = queue.poll(); !queue.isEmpty(); currentCell = queue.poll()) {
+                for(Cell remainingCell : queue) {
+                    if(currentCell.isRelated(remainingCell)) {
+                        throw new InvalidSudokuException("Grid contains conflicting values.");
+                    }
+                }
+            }
+        }
     }
 
     /**
