@@ -151,4 +151,21 @@ public class CellTest {
         assertEquals(emptyCell.toString(), "[Cell row=5; column=4; house=4; value=0]", "To String returned a different string.");
         assertEquals(cell.toString(), "[Cell row=5; column=4; house=4; value=3]", "To String returned a different string.");
     }
+
+    @Test
+    void isRelated_test() {
+        final int row = 0;
+        final int column = 0;
+        final Cell cell = grid.getCell(row, column);
+        final Cell sameRowCell = grid.getCell(row, column + 3);
+        final Cell sameColumnCell = grid.getCell(row + 3, column);
+        final Cell sameNonetCell = grid.getCell( + 1, column + 1);
+        final Cell nonRelatedCell = grid.getCell(row + 3, column + 3);
+        
+        assertTrue(cell.isRelated(cell), "isRelated returned false when compared to itself.");
+        assertTrue(cell.isRelated(sameRowCell), "isRelated returned false when compared to cell in the same row.");
+        assertTrue(cell.isRelated(sameColumnCell), "isRelated returned false when compared to cell in the same column.");
+        assertTrue(cell.isRelated(sameNonetCell), "isRelated returned false when compared to cell in the same nonet.");
+        assertFalse(cell.isRelated(nonRelatedCell), "isRelated returned false when compared to non-related cell.");
+    }
 }
