@@ -175,6 +175,20 @@ public class Cell {
         return 0;
     }
 
+    /**
+     * Checks if a cell is related to this cell or not. Two cells are related if 
+     * they share a house.
+     * @param cell
+     * @return true if related or false otherwise.
+     * @throws NullPointerException
+     */
+    public boolean isRelated(Cell cell) {
+        if(cell == null) {
+            throw new NullPointerException();
+        }
+        return row == cell.getRow() || column == cell.getColumn() || getNonet() == cell.getNonet();
+    }
+
     @Override
     public boolean equals(Object obj) {
         if(obj == null) {
