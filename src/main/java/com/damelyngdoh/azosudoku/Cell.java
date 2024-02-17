@@ -12,10 +12,11 @@ import com.damelyngdoh.azosudoku.exceptions.ValueOutOfBoundsException;
  * by its coordinates, row and column, in the grid.
  *  
  * @author Dame Lyngdoh
+ * @since 1.0.0
  */
 public class Cell {
 
-    private static final String CELL_STRING = "[Cell row=%d; column=%d; house=%d; value=%d]";
+    private static final String CELL_STRING = "[Cell row=%d; column=%d; nonet=%d; value=%d]";
 
     /**
      * Parent grid which contains the cell.

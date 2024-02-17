@@ -14,7 +14,10 @@ import com.damelyngdoh.azosudoku.exceptions.InvalidSizeException;
 import com.damelyngdoh.azosudoku.exceptions.ValueOutOfBoundsException;
 
 /**
+ * Utilities that are used across the package.
+ * 
  * @author Dame Lyngdoh
+ * @since 1.0.0
  */
 public final class Utils {
 

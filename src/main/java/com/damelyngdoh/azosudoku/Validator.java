@@ -9,6 +9,7 @@ import com.damelyngdoh.azosudoku.exceptions.ValueOutOfBoundsException;
  * Including, but not limited to, size, value, null checks and other validations.
  * 
  * @author Dame Lyngdoh
+ * @since 1.0.0
  */
 public class Validator {
 
