@@ -10,7 +10,7 @@
 
   <name>Azo Sudoku Framework</name>
   <description>A framework for solving and generating Sudoku puzzles.</description>
-  <url>https://github.com/DameLyngdoh/sudoku</url>
+  <url>https://github.com/DameLyngdoh/azo-sudoku</url>
   <inceptionYear>2024</inceptionYear>
   <licenses>
     <license>
@@ -27,6 +27,10 @@
       <timezone>Asia/Kolkata</timezone>
     </developer>
   </developers>
+  <issueManagement>
+    <system>GitHub</system>
+    <url>https://github.com/DameLyngdoh/azo-sudoku/issues</url>
+  </issueManagement>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -34,6 +38,7 @@
     <maven.compiler.target>11</maven.compiler.target>
     <junit-jupiter-api.version>5.10.1</junit-jupiter-api.version>
     <junit-jupiter-params.version>5.10.1</junit-jupiter-params.version>
+    <mockito-junit-jupiter.version>5.10.0</mockito-junit-jupiter.version>
 
     <maven-clean-plugin.version>3.1.0</maven-clean-plugin.version>
     <maven-resources-plugin.version>3.0.2</maven-resources-plugin.version>
@@ -59,7 +64,12 @@
       <version>${junit-jupiter-params.version}</version>
       <scope>test</scope>
     </dependency>
-
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-junit-jupiter</artifactId>
+      <version>${mockito-junit-jupiter.version}</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>
