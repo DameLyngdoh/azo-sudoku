@@ -8,5 +8,5 @@ package com.damelyngdoh.azosudoku;
  * @author Dame Lyngdoh
  */
 public enum HouseType {
-    COLUMN, ROW, SQUARE
+    COLUMN, ROW, NONET
 }
