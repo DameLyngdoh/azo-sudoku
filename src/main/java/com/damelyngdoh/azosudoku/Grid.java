@@ -9,6 +9,7 @@ import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import com.damelyngdoh.azosudoku.exceptions.DisallowedValueException;
@@ -65,53 +66,49 @@ public class Grid {
     }
 
     /**
-     * Populates the rows with corresponding cells.
+     * @return map of three type of houses in the grid.
      */
-    private void populateRowHouse() {
-        for(int row = 0, column = 0; row < matrix.length; row++) {
-            House rowHouse = new House(row, this, HouseType.ROW);
-            for(column = 0; column < matrix[row].length; column++)
-                rowHouse.add(matrix[row][column]);
-            this.rows.add(rowHouse);
-        }
-    }
+    private Map<HouseType,List<House>> generateHouses() {
+        /**
+         * Initializing temporary lists to contain the cells.
+         */
+        final List<List<Cell>> tempRows = new ArrayList<>(matrix.length);
+        final List<List<Cell>> tempColumns = new ArrayList<>(matrix.length);
+        final List<List<Cell>> tempNonets = new ArrayList<>(matrix.length);
+        IntStream.range(0, matrix.length).forEach(i -> {
+            tempRows.add(new ArrayList<>(matrix.length));
+            tempColumns.add(new ArrayList<>(matrix.length));
+            tempNonets.add(new ArrayList<>(matrix.length));
+        });
 
-    /**
-     * Populates the columns with corresponding cells.
-     */
-    private void populateColumnHouse() {
-        for(int row = 0, column = 0; column < matrix.length; column++) {
-            House columnHouse = new House(column, this, HouseType.COLUMN);
-            for(row = 0; row < getSize(); row++)
-                columnHouse.add(matrix[row][column]);
-            columns.add(columnHouse);
-        }
-    }
+        /**
+         * Iterating over all the cells in the grid 
+         * and populating each cell into the respective 
+         * temporary lists.
+         */
+        streamCells().forEach(cell -> {
+            tempRows.get(cell.getRow()).add(cell);
+            tempColumns.get(cell.getColumn()).add(cell);
+            tempNonets.get(cell.getNonet()).add(cell);
+        });
 
-    /**
-     * Populates the nonets with corresponding cells.
-     */
-    private void populateNonetHouse() {
-        for(int i = 0; i < getSize(); i++)
-            nonets.add(new House(i, this, HouseType.SQUARE));
-        streamCells().forEach(cell -> nonets.get(cell.getNonet()).add(cell));
-    }
+        /**
+         * Initializing the houses and populating the houses 
+         * from the temporary lists mentioned above.
+         */
+        final List<House> rows = new ArrayList<>(matrix.length);
+        final List<House> columns = new ArrayList<>(matrix.length);
+        final List<House> nonets = new ArrayList<>(matrix.length);
+        IntStream.range(0, matrix.length).forEach(i -> {
+            rows.add(new House(i, this, HouseType.ROW, tempRows.get(i)));
+            columns.add(new House(i, this, HouseType.COLUMN, tempColumns.get(i)));
+            nonets.add(new House(i, this, HouseType.NONET, tempNonets.get(i)));
+        });
 
-    /**
-     * Initializes the rows, columns and nonets.
-     */
-    private void initializeHouses() {
-        this.rows = new ArrayList<>(getSize());
-        this.columns = new ArrayList<>(getSize());
-        this.nonets = new ArrayList<>(getSize());
-        populateRowHouse();
-        populateColumnHouse();
-        populateNonetHouse();
-    }
-
-    private void initializeGrid(int size) {
-        initializeMatrix(size);
-        initializeHouses();
+        /**
+         * Creating and returning map of the three types of houses.
+         */
+        return Map.of(HouseType.ROW, List.copyOf(rows), HouseType.COLUMN, List.copyOf(columns), HouseType.NONET, List.copyOf(nonets));
     }
 
     /**
@@ -122,7 +119,11 @@ public class Grid {
     public Grid(int size) throws InvalidSizeException {
         Validator.validateSize(size);
         this.matrix = new Cell[size][size];
-        initializeGrid(size);
+        initializeMatrix(size);
+        Map<HouseType,List<House>> houses = generateHouses();
+        this.rows = houses.get(HouseType.ROW);
+        this.columns = houses.get(HouseType.COLUMN);
+        this.nonets = houses.get(HouseType.NONET);
     }
 
     /**
@@ -206,7 +207,7 @@ public class Grid {
      * @throws GridIndexOutOfBoundsException thrown when nonet argument is beyond the bounds of the grid context.
      */
     public House getNonet(int index) {
-        Validator.validateIndex(this, index, HouseType.SQUARE);
+        Validator.validateIndex(this, index, HouseType.NONET);
         return nonets.get(index);
     }
     
