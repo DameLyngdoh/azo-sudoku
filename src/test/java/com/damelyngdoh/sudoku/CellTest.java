@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
 
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -13,9 +14,12 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.damelyngdoh.azosudoku.Cell;
 import com.damelyngdoh.azosudoku.Grid;
@@ -27,6 +31,7 @@ import com.damelyngdoh.azosudoku.exceptions.ValueOutOfBoundsException;
  * @author Dame Lyngdoh
  */
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
+@ExtendWith(MockitoExtension.class)
 public class CellTest {
     
     private static final int GRID_ORDER = 9;
@@ -37,7 +42,7 @@ public class CellTest {
     private static final int DIFFERENT_VALID_ROW = 4;
     private static final int DIFFERENT_VALID_VALUE = 1;
     
-    Grid grid;
+    @Mock Grid grid;
     Cell emptyCell;
     Cell differentEmptyCell;
     Cell cell;
@@ -53,7 +58,7 @@ public class CellTest {
     
     @BeforeEach
     void initializeGrid() throws InvalidSizeException, GridIndexOutOfBoundsException, ValueOutOfBoundsException {
-        grid = new Grid(GRID_ORDER);
+        when(grid.getSize()).thenReturn(GRID_ORDER);
         emptyCell = new Cell(grid, VALID_ROW, VALID_COLUMN);
         differentEmptyCell = new Cell(grid, DIFFERENT_VALID_ROW, DIFFERENT_VALID_COLUMN);
         cell = new Cell(grid, VALID_ROW, VALID_COLUMN, VALID_VALUE);
@@ -148,19 +153,19 @@ public class CellTest {
 
     @Test
     void to_string_test() {
-        assertEquals(emptyCell.toString(), "[Cell row=5; column=4; house=4; value=0]", "To String returned a different string.");
-        assertEquals(cell.toString(), "[Cell row=5; column=4; house=4; value=3]", "To String returned a different string.");
+        assertEquals(emptyCell.toString(), "[Cell row=5; column=4; nonet=4; value=0]", "To String returned a different string.");
+        assertEquals(cell.toString(), "[Cell row=5; column=4; nonet=4; value=3]", "To String returned a different string.");
     }
 
     @Test
     void isRelated_test() {
         final int row = 0;
         final int column = 0;
-        final Cell cell = grid.getCell(row, column);
-        final Cell sameRowCell = grid.getCell(row, column + 3);
-        final Cell sameColumnCell = grid.getCell(row + 3, column);
-        final Cell sameNonetCell = grid.getCell( + 1, column + 1);
-        final Cell nonRelatedCell = grid.getCell(row + 3, column + 3);
+        final Cell cell = new Cell(grid, row, column);
+        final Cell sameRowCell = new Cell(grid, row, column + 3);
+        final Cell sameColumnCell = new Cell(grid, row + 3, column);
+        final Cell sameNonetCell = new Cell(grid,  + 1, column + 1);
+        final Cell nonRelatedCell = new Cell(grid, row + 3, column + 3);
         
         assertTrue(cell.isRelated(cell), "isRelated returned false when compared to itself.");
         assertTrue(cell.isRelated(sameRowCell), "isRelated returned false when compared to cell in the same row.");
