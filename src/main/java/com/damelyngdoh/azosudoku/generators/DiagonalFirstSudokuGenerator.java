@@ -14,6 +14,7 @@ import com.damelyngdoh.azosudoku.House;
 import com.damelyngdoh.azosudoku.Utils;
 import com.damelyngdoh.azosudoku.Validator;
 import com.damelyngdoh.azosudoku.exceptions.InvalidSizeException;
+import com.damelyngdoh.azosudoku.exceptions.InvalidSudokuException;
 import com.damelyngdoh.azosudoku.exceptions.ValueOutOfBoundsException;
 
 /**
@@ -158,11 +159,15 @@ public class DiagonalFirstSudokuGenerator implements SudokuGenerator {
     public Grid generate(int size) throws InvalidSizeException {
         Validator.validateSize(size);
         final Grid grid = new Grid(size);
-        final Set<Integer> diagonalNonets = Utils.getDiagonalNonets(grid);
-        populateDiagonalNonets(grid, diagonalNonets, Set.copyOf(grid.getPermissibleValues()));
-            if(grid.getSize() > 1)
-                populateRemainingNonets(grid, grid.getCell(0, Utils.getNonetSize(grid)));
-        resetFixedStatus(grid, diagonalNonets);
+        try {
+            grid.setActiveVerification(false);
+            final Set<Integer> diagonalNonets = Utils.getDiagonalNonets(grid);
+            populateDiagonalNonets(grid, diagonalNonets, Set.copyOf(grid.getPermissibleValues()));
+                if(grid.getSize() > 1)
+                    populateRemainingNonets(grid, grid.getCell(0, Utils.getNonetSize(grid)));
+            resetFixedStatus(grid, diagonalNonets);
+            grid.setActiveVerification(true);
+        } catch (InvalidSudokuException e) {}
         return grid;
     }
 
