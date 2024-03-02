@@ -272,7 +272,7 @@ public class Grid {
             if(column1 > column2) {
                 return 1;
             }
-            return -1;
+            return 0;
         });
         sortedMap.putAll(emptyCells);
         return sortedMap;
