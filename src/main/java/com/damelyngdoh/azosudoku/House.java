@@ -6,22 +6,48 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Objects;
 import java.util.Set;
+import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
 /**
- * Class representing a house (row, column or nonet).
+ * Class representing a house (row, column or nonet). Implements {@link #java.util.List List} interface as this is 
+ * an ordered collection of cells. Implements the list implementation through composition and contains an internal 
+ * list memeber to hold the references of the cells. This list is immutable, hence operations that modify the list 
+ * (add, remove, clear, retainAll, etc) are not supported.
  * 
  * @author Dame Lyngdoh
  * @since 1.0.0
  */
 public class House implements List<Cell> {
+
+    /**
+     * Default cell delimiter for asString method.
+     */
+    public static final String DEFAULT_CELL_DELIMITER = ",";
+
+    /**
+     * Default empty cell notation for asString method.
+     */
+    public static final String DEFAULT_EMPTY_CELL_NOTATION = "0";
     
+    /**
+     * Index of the house in the grid.
+     */
     private final int index;
 
+    /**
+     * Parent grid containing the house.
+     */
     private final Grid grid;
 
+    /**
+     * Type of house.
+     */
     private final HouseType houseType;
 
+    /**
+     * List of cells which form the house.
+     */
     private final List<Cell> cells;
 
     /**
@@ -119,6 +145,67 @@ public class House implements List<Cell> {
         final Set<Integer> missingValues = grid.getPermissibleValues();
         missingValues.removeAll(getPresentValues());
         return missingValues;
+    }
+
+    /**
+     * @return list of all fixed cells in the house.
+     */
+    public List<Cell> getFixedCells() {
+        return cells.stream().filter(cell -> cell.isFixed()).collect(Collectors.toList());
+    }
+
+    /**
+     * @return list of all non-fixed cells in the house.
+     */
+    public List<Cell> getNonFixedCells() {
+        return cells.stream().filter(cell -> !cell.isFixed()).collect(Collectors.toList());
+    }
+
+    /**
+     * Clears the values of all the non-fixed cells in the house.
+     * @return true if at least one of the cell contained a value and is cleard or false otherwise.
+     */
+    public boolean clearValues() {
+        return cells.stream().filter(cell -> !cell.isFixed() && !cell.isEmpty()).map(cell -> cell.removeValue()).count() > 0;
+    }
+
+    /**
+     * Sets the fixed flag of all the cells in the house to true.
+     * @return true if at least one cell was not fixed or false otherwise.
+     */
+    public boolean setFixed() {
+        return cells.stream().filter(cell -> !cell.isFixed()).map(cell -> { cell.setFixed(true); return 1; }).count() > 0;
+    }
+
+    /**
+     * Creates a string containing the values of the cells as a 
+     * sequence of characters separated by the default delimiter and 
+     * empty cell(s) are denoted by the default empty cell notation string.
+     * @return
+     */
+    public String asString() {
+        return asString(DEFAULT_CELL_DELIMITER,DEFAULT_EMPTY_CELL_NOTATION);
+    }
+
+    /**
+     * Creates a string containing the values of the cells as a 
+     * sequence of characters separated by the specified delimiter and 
+     * empty cell(s) are denoted by the specified empty cell notation string.
+     * @param cellDelimiter delimiter string for the values of the cells.
+     * @param emptyCellNotation string representing empty cell.
+     * @return string with integers delimited by specified delimiter.
+     * @throws NullPointerException thrown if null is passed to either cellDelimiter or emptyCellNotation.
+     */
+    public String asString(final String cellDelimiter, final String emptyCellNotation) {
+        if(cellDelimiter == null) {
+            throw new NullPointerException("Null cell delimiter passed.");
+        }
+        if(emptyCellNotation == null) {
+            throw new NullPointerException("Null empty cell notation passed.");
+        }
+        final StringJoiner stringJoiner = new StringJoiner(cellDelimiter);
+        cells.stream().forEach(cell -> stringJoiner.add(cell.isEmpty() ? emptyCellNotation : Integer.toString(cell.getValue())));
+        return stringJoiner.toString();
     }
 
     @Override

@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -21,6 +22,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -46,9 +48,15 @@ public class HouseTest {
     List<Cell> row;
     List<Cell> completeRow;
     List<Cell> column;
+    List<Cell> completeColumn;
     List<Cell> nonet;
+    List<Cell> completeNonet;
     House house;
     House completeHouse;
+    House columnHouse;
+    House nonetHouse;
+    Map<HouseType,House> HOUSES;
+    Map<HouseType,House> COMPLETE_HOUSES;
 
     static Stream<Integer> validIndicesStream() {
         return IntStream.range(0, GRID_ORDER).sorted().boxed();
@@ -94,6 +102,16 @@ public class HouseTest {
             new Cell(mockGrid,6,VALID_INDEX),
             new Cell(mockGrid,7,VALID_INDEX),
             new Cell(mockGrid,8,VALID_INDEX));
+        completeColumn = List.of(
+            new Cell(mockGrid,0,VALID_INDEX,1),
+            new Cell(mockGrid,1,VALID_INDEX,2),
+            new Cell(mockGrid,2,VALID_INDEX,3),
+            new Cell(mockGrid,3,VALID_INDEX,4),
+            new Cell(mockGrid,4,VALID_INDEX,5),
+            new Cell(mockGrid,5,VALID_INDEX,6),
+            new Cell(mockGrid,6,VALID_INDEX,7),
+            new Cell(mockGrid,7,VALID_INDEX,8),
+            new Cell(mockGrid,8,VALID_INDEX,9));
         nonet = List.of(
             new Cell(mockGrid,3,0),
             new Cell(mockGrid,3,1),
@@ -104,8 +122,29 @@ public class HouseTest {
             new Cell(mockGrid,5,0),
             new Cell(mockGrid,5,1),
             new Cell(mockGrid,5,2));
+        completeNonet = List.of(
+            new Cell(mockGrid,3,0,1),
+            new Cell(mockGrid,3,1,2),
+            new Cell(mockGrid,3,2,3),
+            new Cell(mockGrid,4,0,4),
+            new Cell(mockGrid,4,1,5),
+            new Cell(mockGrid,4,2,6),
+            new Cell(mockGrid,5,0,7),
+            new Cell(mockGrid,5,1,8),
+            new Cell(mockGrid,5,2,9));
         house = new House(VALID_INDEX, mockGrid, VALID_GROUP_TYPE, row);
         completeHouse = new House(VALID_INDEX, mockGrid, VALID_GROUP_TYPE, completeRow);
+        HOUSES = Map.of(
+            HouseType.ROW, house,
+            HouseType.COLUMN, new House(VALID_INDEX, mockGrid, HouseType.COLUMN, column),
+            HouseType.NONET, new House(VALID_INDEX, mockGrid, HouseType.NONET, nonet)
+        );
+
+        COMPLETE_HOUSES = Map.of(
+            HouseType.ROW, new House(VALID_INDEX, mockGrid, VALID_GROUP_TYPE, completeRow),
+            HouseType.COLUMN, new House(VALID_INDEX, mockGrid, HouseType.COLUMN, completeColumn),
+            HouseType.NONET, new House(VALID_INDEX, mockGrid, HouseType.NONET, completeNonet)
+        );
     }
 
     @Test
@@ -246,5 +285,104 @@ public class HouseTest {
         House houseWithDifferentIndex = new House(4, mockGrid, VALID_GROUP_TYPE, differentRow);
         assertNotEquals(house.hashCode(), houseWithDifferentIndex.hashCode(),"Hash code of house with different index is equal.");
         assertNotEquals(house.hashCode(), nonet.hashCode(),"Hash code of house with different house type is equal.");
+    }
+
+    @ParameterizedTest
+    @EnumSource(HouseType.class)
+    void getFixedCells_contains_no_fixed_cell_test(final HouseType houseType) {
+        assertTrue(HOUSES.get(houseType).getFixedCells().isEmpty(), "getFixedCells returned a non-empty set with house that does not contain fixed cells.");
+    }
+
+    @ParameterizedTest
+    @EnumSource(HouseType.class)
+    void getFixedCells_contains_fixed_cell_test(final HouseType houseType) {
+        final int fixedCellIndex = 4;
+        final House house = HOUSES.get(houseType);
+        final Cell fixedCell = house.get(fixedCellIndex);
+        fixedCell.setFixed(true);
+        assertTrue(house.getFixedCells().contains(fixedCell), "getFixedCells returned list which does not contain fixed cell.");
+        assertEquals(1, house.getFixedCells().size(), "getFixedCells returned list which has incorrect number of elements.");
+    }
+
+    @ParameterizedTest
+    @EnumSource(HouseType.class)
+    void getNonFixedCells_contains_no_fixed_cell_test(final HouseType houseType) {
+        House house = HOUSES.get(houseType);
+        assertEquals(house.size(), house.getNonFixedCells().size(), "getNonFixedCells returned a list with incorrect number of elements.");
+    }
+
+    @ParameterizedTest
+    @EnumSource(HouseType.class)
+    void getNonFixedCells_contains_fixed_cell_test(final HouseType houseType) {
+        final int fixedCellIndex = 4;
+        final House house = HOUSES.get(houseType);
+        final Cell fixedCell = house.get(fixedCellIndex);
+        fixedCell.setFixed(true);
+        assertFalse(house.getNonFixedCells().contains(fixedCell), "getNonFixedCells returned list which contains fixed cell.");
+        assertEquals(house.size() - 1, house.getNonFixedCells().size(), "getNonFixedCells returned list which has incorrect number of elements.");
+    }
+
+    @ParameterizedTest
+    @EnumSource(HouseType.class)
+    void clearValues_contains_no_values_test(final HouseType houseType) {
+        final House house = HOUSES.get(houseType);
+        assertFalse(house.clearValues(), "clearValues returned true for house with no values set.");
+    }
+
+    @ParameterizedTest
+    @EnumSource(HouseType.class)
+    void clearValues_contains_values_test(final HouseType houseType) {
+        final House house = COMPLETE_HOUSES.get(houseType);
+        assertTrue(house.clearValues(), "clearValues returned false for house with all values set.");
+        for(Cell cell : house) {
+            assertTrue(cell.isEmpty(), "clearValues did not clear the value of a cell.");
+        }
+    }
+
+    @ParameterizedTest
+    @EnumSource(HouseType.class)
+    void setFixed_contains_no_fixed_cells_test(final HouseType houseType) {
+        final House house = HOUSES.get(houseType);
+        assertTrue(house.setFixed(), "setFixed returned false for house with no fixed cells.");
+        for(Cell cell : house) {
+            assertTrue(cell.isFixed(), "setFixed did not set the fixed flag of a cell.");
+        }
+    }
+
+    @ParameterizedTest
+    @EnumSource(HouseType.class)
+    void setFixed_contains_fixed_cells_test(final HouseType houseType) {
+        final House house = HOUSES.get(houseType);
+        house.forEach(cell -> cell.setFixed(true));
+        assertFalse(house.setFixed(), "setFixed returned true for house with fixed cells.");
+        for(Cell cell : house) {
+            assertTrue(cell.isFixed(), "setFixed changed the fixed flag of an already fixed cell.");
+        }
+    }
+
+    @ParameterizedTest
+    @EnumSource(HouseType.class)
+    void asString_test(final HouseType houseType) {
+        final House emptyHouse = HOUSES.get(houseType);
+        final House completeHouse = COMPLETE_HOUSES.get(houseType);
+        final String emptyHouseString = "0,0,0,0,0,0,0,0,0";
+        final String completeHouseString = "1,2,3,4,5,6,7,8,9";
+
+        assertEquals(emptyHouseString, emptyHouse.asString(), "asString returned incorrect string with empty house.");
+        assertEquals(completeHouseString, completeHouse.asString(), "asString returned incorrect string with complete house.");
+    }
+
+    @ParameterizedTest
+    @EnumSource(HouseType.class)
+    void asString_with_params_test(final HouseType houseType) {
+        final House emptyHouse = HOUSES.get(houseType);
+        final House completeHouse = COMPLETE_HOUSES.get(houseType);
+        final String emptyCellNotation = "X";
+        final String delimiter = "#";
+        final String emptyHouseString = "X#X#X#X#X#X#X#X#X";
+        final String completeHouseString = "1#2#3#4#5#6#7#8#9";
+
+        assertEquals(emptyHouseString, emptyHouse.asString(delimiter,emptyCellNotation), "asString with parameters returned incorrect string with empty house.");
+        assertEquals(completeHouseString, completeHouse.asString(delimiter,emptyCellNotation), "asString with parameters returned incorrect string with complete house.");
     }
 }
