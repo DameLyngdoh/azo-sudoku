@@ -6,7 +6,7 @@
 
   <groupId>com.damelyngdoh</groupId>
   <artifactId>azosudoku</artifactId>
-  <version>1.0.0</version>
+  <version>2.0.1</version>
 
   <name>Azo Sudoku Framework</name>
   <description>A framework for solving and generating Sudoku puzzles.</description>
