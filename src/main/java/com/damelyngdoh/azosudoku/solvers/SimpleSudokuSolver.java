@@ -39,7 +39,7 @@ public class SimpleSudokuSolver implements SudokuSolver {
      * @param currentIndex the current index of the emtpy cells list which the recursion has reached.
      * @return true if from the perspective of the current index a value was set and no invalid empty cell was encountered or false otherwise.
      */
-    private boolean solveRecursively(Grid grid, List<Cell> emptyCellsList, int currentIndex) {
+    boolean solveRecursively(Grid grid, List<Cell> emptyCellsList, int currentIndex) {
         if(currentIndex >= emptyCellsList.size()) {
             return true;
         }

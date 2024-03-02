@@ -5,9 +5,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.NavigableMap;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -229,6 +231,51 @@ public class Grid {
         return streamCells()
             .filter(cell -> cell.isEmpty())
             .collect(Collectors.toSet());
+    }
+
+    /**
+     * @return an immutable map of emtpy cell to set of permissible values for the cell.
+     */
+    public Map<Cell,Set<Integer>> getEmptyCellsWithPermissibleValues() {
+        return getEmptyCells()
+            .stream()
+            .collect(Collectors.toUnmodifiableMap(
+                cell -> cell,
+                cell -> getPermissibleValues(cell)));
+    }
+
+    /**
+     * @return a navigable sorted map of emtpy cell to set of permissible values for the cell.
+     */
+    public NavigableMap<Cell,Set<Integer>> getSortedEmptyCellsWithPermissibleValues() {
+        final Map<Cell,Set<Integer>> emptyCells = getEmptyCellsWithPermissibleValues();
+        final NavigableMap<Cell,Set<Integer>> sortedMap = new TreeMap<>((key1, key2) -> {
+            int size1 = emptyCells.get(key1).size();
+            int size2 = emptyCells.get(key2).size();
+            if(size1 > size2) {
+                return 1;
+            }
+            if(size1 < size2) {
+                return -1;
+            }
+            int row1 = key1.getRow();
+            int row2 = key2.getRow();
+            if(row1 > row2) {
+                return 1;
+            }
+            if(row1 < row2) {
+                return -1;
+            }
+
+            int column1 = key1.getColumn();
+            int column2 = key2.getColumn();
+            if(column1 > column2) {
+                return 1;
+            }
+            return -1;
+        });
+        sortedMap.putAll(emptyCells);
+        return sortedMap;
     }
 
     /**

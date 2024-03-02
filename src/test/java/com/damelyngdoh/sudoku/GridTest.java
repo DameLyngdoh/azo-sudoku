@@ -9,9 +9,15 @@ import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.NavigableMap;
+import java.util.NavigableSet;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -699,4 +705,154 @@ public class GridTest {
             emptyGrid.setValue(0, 1, 1);
         }, "setValue threw exception with conflicting values when active verificaiton flag is turned off.");
     }
+
+    @Test
+    void getEmptyCellsWithPermissibleValues_test() {
+        final Set<Cell> emptyCellsInPartialGrid = partialEmptyGrid.getEmptyCells();
+        final Map<Cell,Set<Integer>> valuesMap = new HashMap<>();
+        valuesMap.put(partialEmptyGrid.getCell(0,0), Set.of(2,3,8));
+        valuesMap.put(partialEmptyGrid.getCell(0,2), Set.of(2,3,6,8));
+        valuesMap.put(partialEmptyGrid.getCell(0,5), Set.of(2,6,8));
+        valuesMap.put(partialEmptyGrid.getCell(0,8), Set.of(3,6));
+
+        valuesMap.put(partialEmptyGrid.getCell(1,0), Set.of(2,4,5,8));
+        valuesMap.put(partialEmptyGrid.getCell(1,2), Set.of(2,4,5,6,8));
+        valuesMap.put(partialEmptyGrid.getCell(1,3), Set.of(1,2,4,6,8));
+        valuesMap.put(partialEmptyGrid.getCell(1,4), Set.of(1,2,4,6,8));
+        valuesMap.put(partialEmptyGrid.getCell(1,7), Set.of(1,6));
+        valuesMap.put(partialEmptyGrid.getCell(1,8), Set.of(1,6));
+
+        valuesMap.put(partialEmptyGrid.getCell(2,0), Set.of(3,4,9));
+        valuesMap.put(partialEmptyGrid.getCell(2,1), Set.of(3,4,6,9));
+        valuesMap.put(partialEmptyGrid.getCell(2,2), Set.of(3,4,6,9));
+        valuesMap.put(partialEmptyGrid.getCell(2,3), Set.of(1,4,6,7));
+        valuesMap.put(partialEmptyGrid.getCell(2,4), Set.of(1,4,6,7));
+        valuesMap.put(partialEmptyGrid.getCell(2,5), Set.of(1,6,7));
+
+        valuesMap.put(partialEmptyGrid.getCell(3,0), Set.of(1,3,5,7,9));
+        valuesMap.put(partialEmptyGrid.getCell(3,1), Set.of(3,5,9));
+        valuesMap.put(partialEmptyGrid.getCell(3,2), Set.of(1,3,5,7,9));
+        valuesMap.put(partialEmptyGrid.getCell(3,3), Set.of(1,3,6,7,8));
+        valuesMap.put(partialEmptyGrid.getCell(3,4), Set.of(1,3,6,7,8,9));
+        valuesMap.put(partialEmptyGrid.getCell(3,6), Set.of(5,6));
+        valuesMap.put(partialEmptyGrid.getCell(3,7), Set.of(1,5,6,7,9));
+
+        valuesMap.put(partialEmptyGrid.getCell(4,1), Set.of(2,3,4,5,9));
+        valuesMap.put(partialEmptyGrid.getCell(4,2), Set.of(1,2,3,4,5,7,9));
+        valuesMap.put(partialEmptyGrid.getCell(4,3), Set.of(1,2,3,7));
+        valuesMap.put(partialEmptyGrid.getCell(4,4), Set.of(1,2,3,7,9));
+        valuesMap.put(partialEmptyGrid.getCell(4,5), Set.of(1,2,7,9));
+        valuesMap.put(partialEmptyGrid.getCell(4,6), Set.of(4,5));
+        valuesMap.put(partialEmptyGrid.getCell(4,8), Set.of(1,4,7,9));
+
+        valuesMap.put(partialEmptyGrid.getCell(5,0), Set.of(1,2,4,7,9));
+        valuesMap.put(partialEmptyGrid.getCell(5,2), Set.of(1,2,4,7,9));
+        valuesMap.put(partialEmptyGrid.getCell(5,4), Set.of(1,2,6,7,9));
+        valuesMap.put(partialEmptyGrid.getCell(5,5), Set.of(1,2,6,7,9));
+        valuesMap.put(partialEmptyGrid.getCell(5,7), Set.of(1,6,7,9));
+        valuesMap.put(partialEmptyGrid.getCell(5,8), Set.of(1,4,6,7,9));
+
+        valuesMap.put(partialEmptyGrid.getCell(6,0), Set.of(2,3,4,5,7,8,9));
+        valuesMap.put(partialEmptyGrid.getCell(6,1), Set.of(2,3,4,5,6,9));
+        valuesMap.put(partialEmptyGrid.getCell(6,2), Set.of(2,3,4,5,6,7,8,9));
+        valuesMap.put(partialEmptyGrid.getCell(6,3), Set.of(2,3,4,6,7,8));
+        valuesMap.put(partialEmptyGrid.getCell(6,4), Set.of(2,3,4,6,7,8,9));
+        valuesMap.put(partialEmptyGrid.getCell(6,5), Set.of(2,5,6,7,8,9));
+        valuesMap.put(partialEmptyGrid.getCell(6,7), Set.of(5,6,7,9));
+        valuesMap.put(partialEmptyGrid.getCell(6,8), Set.of(4,6,7,8,9));
+
+        valuesMap.put(partialEmptyGrid.getCell(7,0), Set.of(1,2,3,4,5,7,8,9));
+        valuesMap.put(partialEmptyGrid.getCell(7,1), Set.of(2,3,4,5,6,9));
+        valuesMap.put(partialEmptyGrid.getCell(7,2), Set.of(1,2,3,4,5,6,7,8,9));
+        valuesMap.put(partialEmptyGrid.getCell(7,3), Set.of(1,2,3,4,6,7,8));
+        valuesMap.put(partialEmptyGrid.getCell(7,4), Set.of(1,2,3,4,6,7,8,9));
+        valuesMap.put(partialEmptyGrid.getCell(7,5), Set.of(1,2,5,6,7,8,9));
+        valuesMap.put(partialEmptyGrid.getCell(7,6), Set.of(2,4,5,6));
+        valuesMap.put(partialEmptyGrid.getCell(7,7), Set.of(5,6,7,9));
+        valuesMap.put(partialEmptyGrid.getCell(7,8), Set.of(4,6,7,8,9));
+
+        valuesMap.put(partialEmptyGrid.getCell(8,0), Set.of(1,2,4,5,7,8,9));
+        valuesMap.put(partialEmptyGrid.getCell(8,1), Set.of(2,4,5,6,9));
+        valuesMap.put(partialEmptyGrid.getCell(8,2), Set.of(1,2,4,5,6,7,8,9));
+        valuesMap.put(partialEmptyGrid.getCell(8,3), Set.of(1,2,4,6,7,8));
+        valuesMap.put(partialEmptyGrid.getCell(8,4), Set.of(1,2,4,6,7,8,9));
+        valuesMap.put(partialEmptyGrid.getCell(8,5), Set.of(1,2,5,6,7,8,9));
+        valuesMap.put(partialEmptyGrid.getCell(8,6), Set.of(2,4,5,6));
+        valuesMap.put(partialEmptyGrid.getCell(8,8), Set.of(4,6,7,8,9));
+  
+        final Map<Cell,Set<Integer>> actualEmptyCellMapForPartialGrid = partialEmptyGrid.getEmptyCellsWithPermissibleValues();
+        assertEquals(CELL_COUNT, emptyGrid.getEmptyCellsWithPermissibleValues().size(), "getEmptyCellsWithPermissibleValues returned incorrect number of entries not equal to the size of the grid for an empty grid.");
+        assertTrue(completeGrid.getEmptyCellsWithPermissibleValues().isEmpty(), "getEmptyCellsWithPermissibleValues returned incorrect number of entries which is not an empty map for a complete grid.");
+        assertAll(
+            () -> assertEquals(emptyCellsInPartialGrid.size(), actualEmptyCellMapForPartialGrid.size(), "getEmptyCellsWithPermissibleValues returned a map with size not equal to the set of empty cells of partial empty grid."),
+            () -> {
+                for(Cell cell : emptyCellsInPartialGrid) {
+                    assertTrue(actualEmptyCellMapForPartialGrid.containsKey(cell), "getEmptyCellsWithPermissibleValues has a key which is not present in empty cells set of partial grid.");
+                }
+            }
+        );
+        
+        assertEquals(valuesMap, actualEmptyCellMapForPartialGrid, "getEmptyCellsWithPermissibleValues returned incorrect map for partially empty grid.");
+        assertTrue(invalidGrid.getEmptyCellsWithPermissibleValues().containsValue(Set.of()), "getEmptyCellsWithPermissibleValues returned a map which does not contain an empty value set in the values for invalid grid.");
+    }
+
+    @Test
+    void getSortedEmptyCellsWithPermissibleValues_test() {
+        final Map<Cell,Set<Integer>> valuesMap = partialEmptyGrid.getEmptyCellsWithPermissibleValues();
+        SortedMap<Cell,Set<Integer>> sortedValuesMap = new TreeMap<>((key1,key2) -> {
+            int size1 = valuesMap.get(key1).size();
+            int size2 = valuesMap.get(key2).size();
+            if(size1 > size2) {
+                return 1;
+            }
+            if(size1 < size2) {
+                return -1;
+            }
+            int row1 = key1.getRow();
+            int row2 = key2.getRow();
+            if(row1 > row2) {
+                return 1;
+            }
+            if(row1 < row2) {
+                return -1;
+            }
+
+            int column1 = key1.getColumn();
+            int column2 = key2.getColumn();
+            if(column1 > column2) {
+                return 1;
+            }
+            return -1;
+        });
+        sortedValuesMap.putAll(valuesMap);
+        assertEquals(CELL_COUNT, emptyGrid.getSortedEmptyCellsWithPermissibleValues().size(), "getSortedEmptyCellsWithPermissibleValues returned incorrect number of entries not equal to the size of the grid for an empty grid.");
+        assertTrue(completeGrid.getSortedEmptyCellsWithPermissibleValues().isEmpty(), "getSortedEmptyCellsWithPermissibleValues returned incorrect number of entries which is not an empty map for a complete grid.");
+        assertTrue(invalidGrid.getSortedEmptyCellsWithPermissibleValues().containsValue(Set.of()), "getSortedEmptyCellsWithPermissibleValues returned a map which does not contain an empty value set in the values for invalid grid.");
+        assertEquals(valuesMap.size(), sortedValuesMap.size(), "getSortedEmptyCellsWithPermissibleValues returned incorrect number of entries.");
+        
+        final NavigableSet<Cell> navigableSetExpected = ((TreeMap<Cell,Set<Integer>>)sortedValuesMap).descendingKeySet();
+        final NavigableSet<Cell> navigableSetActual = ((TreeMap<Cell,Set<Integer>>)partialEmptyGrid.getSortedEmptyCellsWithPermissibleValues()).descendingKeySet();
+        assertAll(
+            () -> assertEquals(navigableSetExpected.size(), navigableSetActual.size(), "getSortedEmptyCellsWithPermissibleValues returned sorted map with incorrect number of entries."),
+            () -> {
+                while(!navigableSetExpected.isEmpty()) {
+                    assertEquals(navigableSetExpected.pollFirst(), navigableSetActual.pollFirst(), "getSortedEmptyCellsWithPermissibleValues returned incorrect element order.");
+                }  
+            }
+        );
+    }
+
+    @Test
+    void getSortedEmptyCellsWithPermissibleValues_order_test() {
+        Map.Entry<Cell,Set<Integer>> current, previous;
+        final NavigableMap<Cell,Set<Integer>> navigableMap = partialEmptyGrid.getSortedEmptyCellsWithPermissibleValues();
+        previous = navigableMap.pollFirstEntry();
+        current = navigableMap.pollFirstEntry();
+        while(!navigableMap.isEmpty()) {
+            assertTrue(current.getValue().size() >= previous.getValue().size());
+            previous = current;
+            current = navigableMap.pollFirstEntry();
+        }
+    }
+
 }
